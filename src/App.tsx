@@ -1,3 +1,6 @@
+import { Button } from '@alfalab/core-components/button/cssm';
+import { PureCell } from '@alfalab/core-components/pure-cell/cssm';
+import { Radio } from '@alfalab/core-components/radio/cssm';
 import { Typography } from '@alfalab/core-components/typography/cssm';
 import { BankMIcon } from '@alfalab/icons-glyph/BankMIcon';
 import { FlameMIcon } from '@alfalab/icons-glyph/FlameMIcon';
@@ -34,6 +37,25 @@ type CategoryPillProps = {
   isActive: boolean;
   onClick: () => void;
 };
+
+const answers = [
+  {
+    id: 1,
+    answer: () => 'Ничего, это просто голосование',
+  },
+  {
+    id: 2,
+    answer: (sum: number) => `Потеряю поставленные ${sum} ₽ кэшбэка`,
+  },
+  {
+    id: 3,
+    answer: (sum: number) => `Спишут ${sum} ₽ с карты`,
+  },
+  {
+    id: 4,
+    answer: () => 'Затрудняюсь ответить',
+  },
+];
 
 const CategoryPill = ({ category, isActive, onClick }: CategoryPillProps) => {
   const Icon = categoryIcons[category as keyof typeof categoryIcons] ?? StarMIcon;
@@ -132,11 +154,13 @@ const QuestionCard = ({
 export const App = () => {
   const { questions } = useStocksData();
   const [activeCategory, setActiveCategory] = useState(CATEGORY_ALL);
+  const [view, setView] = useState<'final' | 'answer'>('answer');
   const [GaugeChartComponent, setGaugeChartComponent] = useState<ComponentType<Record<string, unknown>> | null>(null);
   const [answerData, setAnswerData] = useState<{
     question: QuestionItem;
     answer: 'yes' | 'no';
   } | null>(null);
+  const [finalAnswer, setFinalAnswer] = useState<string>('');
 
   useEffect(() => {
     if (!LS.getItem(LSKeys.UserId, null)) {
@@ -180,6 +204,44 @@ export const App = () => {
   const filteredQuestions =
     activeCategory === CATEGORY_ALL ? questions : questions.filter(({ category }) => category === activeCategory);
 
+  if (view === 'final') {
+    return (
+      <>
+        <div className={appSt.container}>
+          <Typography.Title tag="h1" view="medium" weight="semibold" font="system" style={{ marginTop: '1rem' }}>
+            Как вы поняли — что будет с вашим кешбеком, если не угадаете?
+          </Typography.Title>
+
+          {answers.map(dataAnswer => (
+            <PureCell
+              onClick={() => {
+                setFinalAnswer(dataAnswer.answer(100));
+              }}
+              className={appSt.cellAnswer}
+            >
+              <PureCell.Content>
+                <PureCell.Main>
+                  <Typography.Text view="primary-medium">{dataAnswer.answer(100)}</Typography.Text>
+                </PureCell.Main>
+              </PureCell.Content>
+              <PureCell.Addon verticalAlign="center">
+                <Radio
+                  checked={finalAnswer === dataAnswer.answer(100)}
+                  onChange={() => setFinalAnswer(dataAnswer.answer(100))}
+                />
+              </PureCell.Addon>
+            </PureCell>
+          ))}
+        </div>
+        <div className={appSt.bottomBtn}>
+          <Button type="button" block view="primary" disabled={!finalAnswer}>
+            Продолжить
+          </Button>
+        </div>
+      </>
+    );
+  }
+
   if (answerData) {
     return (
       <AnswerScreen
@@ -188,6 +250,7 @@ export const App = () => {
         GaugeChartComponent={GaugeChartComponent}
         onBack={() => setAnswerData(null)}
         setAnswerData={setAnswerData}
+        setView={setView}
       />
     );
   }

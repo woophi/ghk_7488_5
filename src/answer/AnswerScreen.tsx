@@ -16,6 +16,7 @@ type AnswerScreenProps = {
   GaugeChartComponent: ComponentType<Record<string, unknown>> | null;
   onBack: () => void;
   setAnswerData: React.Dispatch<React.SetStateAction<{ question: QuestionItem; answer: 'yes' | 'no' } | null>>;
+  setView: React.Dispatch<React.SetStateAction<'answer' | 'final'>>;
 };
 
 const formatRub = (value: number) => (
@@ -27,7 +28,14 @@ const formatRub = (value: number) => (
   </>
 );
 
-export const AnswerScreen = ({ question, answer, GaugeChartComponent, onBack, setAnswerData }: AnswerScreenProps) => {
+export const AnswerScreen = ({
+  question,
+  answer,
+  GaugeChartComponent,
+  onBack,
+  setAnswerData,
+  setView,
+}: AnswerScreenProps) => {
   const stake = 100;
   const selectedCoeff = answer === 'yes' ? question.yesX : question.noX;
   const commission = Math.round(stake * 0.02);
@@ -120,19 +128,15 @@ export const AnswerScreen = ({ question, answer, GaugeChartComponent, onBack, se
           </section>
 
           <section className={answerSt.sectionCard}>
-            <Typography.Text
-              tag="p"
-              view="primary-medium"
-              defaultMargins={false}
-              weight="bold"
-              className={answerSt.sectionTitle}
-            >
-              О событии
-            </Typography.Text>
-
             <div className={answerSt.eventRow}>
-              <Typography.Text tag="p" view="primary-medium" defaultMargins={false} className={answerSt.eventText}>
-                {question.description}
+              <Typography.Text
+                tag="p"
+                view="primary-medium"
+                defaultMargins={false}
+                weight="bold"
+                className={answerSt.sectionTitle}
+              >
+                О событии
               </Typography.Text>
               <QuestionGauge
                 id={`answer-gauge-${question.question}`}
@@ -141,8 +145,11 @@ export const AnswerScreen = ({ question, answer, GaugeChartComponent, onBack, se
                 GaugeChartComponent={GaugeChartComponent}
               />
             </div>
-          </section>
 
+            <Typography.Text tag="p" view="primary-medium" defaultMargins={false} className={answerSt.eventText}>
+              {question.description}
+            </Typography.Text>
+          </section>
           <section className={answerSt.sectionCard}>
             <Typography.Text
               tag="p"
@@ -206,7 +213,7 @@ export const AnswerScreen = ({ question, answer, GaugeChartComponent, onBack, se
               >
                 <b>{winAmount.toLocaleString('ru-RU')}</b>{' '}
                 <Typography.TitleMobile
-                  tag="h5"
+                  tag="div"
                   view="xsmall"
                   font="system"
                   color="secondary"
@@ -235,6 +242,9 @@ export const AnswerScreen = ({ question, answer, GaugeChartComponent, onBack, se
               {stake.toLocaleString('ru-RU')} ₽ кешбэка
             </Typography.Text>
           }
+          onClick={() => {
+            setView('final');
+          }}
         >
           <Typography.Text tag="span" view="primary-medium" color="primary-inverted" weight="medium">
             Поставить
