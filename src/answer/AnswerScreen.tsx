@@ -3,7 +3,7 @@ import { Typography } from '@alfalab/core-components/typography/cssm';
 import { ChevronLeftMIcon } from '@alfalab/icons-glyph/ChevronLeftMIcon';
 import { StarMIcon } from '@alfalab/icons-glyph/StarMIcon';
 import { UsersMIcon } from '@alfalab/icons-glyph/UsersMIcon';
-import { type ComponentType } from 'react';
+import { useEffect, type ComponentType } from 'react';
 import { QuestionGauge } from '../components/QuestionGauge';
 import { appSt } from '../style.css';
 import type { QuestionItem } from '../types';
@@ -40,6 +40,10 @@ export const AnswerScreen = ({
   const selectedCoeff = answer === 'yes' ? question.yesX : question.noX;
   const commission = Math.round(stake * 0.02);
   const winAmount = Math.round(stake * selectedCoeff);
+
+  useEffect(() => {
+    window.gtag('event', '7488_event_impression', { var: 'var5', question: question.question });
+  }, []);
 
   return (
     <div className={appSt.page}>
@@ -243,6 +247,12 @@ export const AnswerScreen = ({
             </Typography.Text>
           }
           onClick={() => {
+            window.gtag('event', '7488_bet_click', {
+              var: 'var5',
+              question: question.question,
+              answer,
+              bet_size: String(stake),
+            });
             setView('final');
           }}
         >
