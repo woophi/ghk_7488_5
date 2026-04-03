@@ -73,23 +73,15 @@ const CategoryPill = ({ category, isActive, onClick }: CategoryPillProps) => {
 type AnswerButtonProps = {
   question: QuestionItem;
   answer: 'yes' | 'no';
-  setAnswerData: React.Dispatch<React.SetStateAction<{ question: QuestionItem; answer: 'yes' | 'no' } | null>>;
 };
 
-const AnswerButton = ({ question, answer, setAnswerData }: AnswerButtonProps) => {
+const AnswerButton = ({ question, answer }: AnswerButtonProps) => {
   const tone = getAnswerTone(question, answer);
   const multiplier = answer === 'yes' ? question.yesX : question.noX;
   const isOnFire = question.onFire === answer;
 
   return (
-    <button
-      className={tone === 'positive' ? appSt.answerButtonPositive : appSt.answerButtonNegative}
-      type="button"
-      onClick={() => {
-        window.gtag('event', '7488_answer_click', { question: question.question, answer, var: 'var5' });
-        setAnswerData({ question, answer });
-      }}
-    >
+    <button className={tone === 'positive' ? appSt.answerButtonPositive : appSt.answerButtonNegative} type="button">
       <Typography.Text tag="span" view="primary-medium" weight="bold" color={tone === 'positive' ? 'positive' : 'negative'}>
         {getAnswerText(answer)}
       </Typography.Text>
@@ -126,7 +118,17 @@ const QuestionCard = ({
     return null;
   }
   return (
-    <article className={appSt.card}>
+    <article
+      className={appSt.card}
+      onClick={() => {
+        window.gtag('event', '7488_answer_click', {
+          question: question.question,
+          answer: question.activeButton,
+          var: 'var5',
+        });
+        setAnswerData({ question, answer: question.activeButton });
+      }}
+    >
       <div className={appSt.cardHead}>
         <div className={appSt.categoryTag}>
           <Icon className={appSt.categoryTagIcon} />
@@ -150,8 +152,8 @@ const QuestionCard = ({
       </div>
 
       <div className={appSt.answersRow}>
-        <AnswerButton question={question} answer="yes" setAnswerData={setAnswerData} />
-        <AnswerButton question={question} answer="no" setAnswerData={setAnswerData} />
+        <AnswerButton question={question} answer="yes" />
+        <AnswerButton question={question} answer="no" />
       </div>
     </article>
   );
